@@ -33,8 +33,6 @@ func newTraces() *traces {
 	}
 }
 
-// Trace interface
-
 // Timestamp returns trace timestamp
 func (t Trace) Timestamp() time.Time {
 	return t.timestamp
