@@ -54,8 +54,16 @@ func (ep *Endpoint) Name() string {
 	return ep.name
 }
 
+func (ep *Endpoint) SetName(name string) {
+	ep.name = name
+}
+
 func (ep *Endpoint) Service() Service {
 	return ep.service
+}
+
+func (ep Endpoint) SetService(s Service) {
+	ep.service = s
 }
 
 // Resource path functions
