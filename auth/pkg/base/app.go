@@ -1,4 +1,4 @@
-// Package base provides a foundation for building microservices.
+// Package base provides a tiny foundation for building microservices.
 // NOTE: For convenience it is being developed here but will be moved its own
 // module after stabilizing the API.
 package base
