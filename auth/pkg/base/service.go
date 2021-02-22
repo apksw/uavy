@@ -3,15 +3,12 @@ package base
 type (
 	Service interface {
 		Name() string
-		Service() Service
-		SetService(Service)
 	}
 )
 
 type (
 	BaseService struct {
-		name    string
-		service Service
+		name string
 	}
 )
 
@@ -27,10 +24,6 @@ func (bs BaseService) Name() string {
 	return bs.name
 }
 
-func (bs BaseService) Service() Service {
-	return bs.service
-}
-
-func (bs BaseService) SetService(s Service) {
-	bs.service = s
+func (bs BaseService) SetName(name string) {
+	bs.name = name
 }
