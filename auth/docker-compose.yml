@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - mongo
+
+  mongo:
+    image: 'mongo'
+    container_name: 'mongo'
+    restart: always
+    command: --auth
+    environment:
+      - MONGO_INITDB_DATABASE=auth
+      - MONGO_INITDB_ROOT_USERNAME=auth
+      - MONGO_INITDB_ROOT_PASSWORD=auth
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./_data:/data/db
+
+volumes:
+    _data:

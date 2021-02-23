@@ -1,0 +1,9 @@
+# Base build image
+FROM golang:1.16 AS build
+
+WORKDIR test
+
+COPY . .
+
+# Entrypoint
+ENTRYPOINT ["go", "test", "-v", "./...", "-coverprofile", "cover.out"]
