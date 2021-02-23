@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"gitlab.com/adrianpk/uavy/auth/pkg/jsonapi"
+	"gitlab.com/adrianpk/uavy/auth/internal/jsonapi"
 )
 
 func (app *App) addJSONAPIAuthRouter(parent chi.Router) chi.Router {

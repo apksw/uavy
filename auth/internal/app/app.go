@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"sync"
 
+	"gitlab.com/adrianpk/uavy/auth/internal/jsonapi"
 	"gitlab.com/adrianpk/uavy/auth/pkg/base"
-	"gitlab.com/adrianpk/uavy/auth/pkg/jsonapi"
 )
 
 type (
