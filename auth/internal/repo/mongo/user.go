@@ -1,3 +1,75 @@
 // package mongo provides a Mongo based implementation of UserRepo
 // interface
 package mongo
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+	"gitlab.com/adrianpk/uavy/auth/internal/db"
+	"gitlab.com/adrianpk/uavy/auth/internal/model"
+	"gitlab.com/adrianpk/uavy/auth/pkg/base"
+)
+
+type (
+	// UserRepo interface
+	UserRepo struct {
+		*base.BaseWorker
+		db *db.Client
+	}
+)
+
+func NewUserRepo(name string, db *db.Client) *UserRepo {
+	return &UserRepo{
+		BaseWorker: base.NewWorker(name),
+		db:         db,
+	}
+}
+
+func (ur *UserRepo) Create(ctx context.Context, user *model.User) error {
+	return nil
+}
+
+func (ur *UserRepo) GetAll(ctx context.Context) (users []model.User, err error) {
+	return []model.User{}, nil
+}
+
+func (ur *UserRepo) Get(ctx context.Context, uid uuid.UUID) (user model.User, err error) {
+	return model.User{}, nil
+}
+
+func (ur *UserRepo) GetBySlug(ctx context.Context, slug string) (user model.User, err error) {
+	return model.User{}, nil
+}
+
+func (ur *UserRepo) GetByUsername(ctx context.Context, username string) (model.User, error) {
+	return model.User{}, nil
+}
+
+func (ur *UserRepo) Update(ctx context.Context, user *model.User) error {
+	return nil
+}
+
+func (ur *UserRepo) Delete(ctx context.Context, uid uuid.UUID) error {
+	return nil
+}
+
+func (ur *UserRepo) DeleteBySlug(ctx context.Context, slug string) error {
+	return nil
+}
+
+func (ur *UserRepo) DeleteByUsername(ctx context.Context, username string) error {
+	return nil
+}
+
+func (ur *UserRepo) GetBySlugAndToken(ctx context.Context, slug, token string) (model.User, error) {
+	return model.User{}, nil
+}
+
+func (ur *UserRepo) ConfirmUser(ctx context.Context, slug, token string) (err error) {
+	return nil
+}
+
+func (ur *UserRepo) SignIn(ctx context.Context, username, password string) (*model.Auth, error) {
+	return &model.Auth{}, nil
+}

@@ -11,7 +11,7 @@ type (
 	// UserRepo interface
 	UserRepo interface {
 		Create(ctx context.Context, user *model.User) error
-		GetAll() (ctx context.Context, users []model.User, err error)
+		GetAll(ctx context.Context) (users []model.User, err error)
 		Get(ctx context.Context, uid uuid.UUID) (user model.User, err error)
 		GetBySlug(ctx context.Context, slug string) (user model.User, err error)
 		GetByUsername(ctx context.Context, username string) (model.User, error)
