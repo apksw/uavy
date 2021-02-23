@@ -15,16 +15,24 @@ type (
 	Client struct {
 		*base.BaseService
 		*mongo.Client
-		maxRetries uint64
+		config Config
+	}
+
+	Config struct {
+		Host       string
+		Port       int
+		User       string
+		Pass       string
+		MaxRetries uint64
 	}
 )
 
 // NewMongoClient
 // NOTE: Other config parametes should be passed
-func NewMongoClient(name string, maxRetries uint64) *Client {
+func NewMongoClient(name string, cfg Config) *Client {
 	return &Client{
 		BaseService: base.NewService("mongo-client"),
-		maxRetries:  maxRetries,
+		config:      cfg,
 	}
 }
 

@@ -14,6 +14,9 @@ type (
 	// App description
 	App struct {
 		*base.App
+
+		Config
+
 		JSONAPIEndpoint *jsonapi.Endpoint
 		// NOTE: Eventually:
 		// WebEndpoint     *web.Endpoint
@@ -22,9 +25,9 @@ type (
 )
 
 // NewApp initializes new App worker instance
-func NewApp(name string, cfg *base.Config) (*App, error) {
+func NewApp(name string, cfg *Config) (*App, error) {
 	app := App{
-		App: base.NewApp(name, cfg),
+		App: base.NewApp(name),
 	}
 
 	// Endpoint
@@ -65,7 +68,7 @@ func (app *App) Stop() {
 }
 
 func (app *App) StartJSONAPI() error {
-	p := fmt.Sprintf(":%s", app.Config().JSONAPIPort)
+	p := fmt.Sprintf(":%s", app.Config.Server.JSONAPIPort)
 
 	log.Printf("JSON REST Server initializing", "port", p)
 

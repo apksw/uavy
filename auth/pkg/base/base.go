@@ -17,9 +17,6 @@ type (
 		name     string
 		revision string
 
-		// Config
-		config *Config
-
 		// Service
 		Service Service
 
@@ -36,25 +33,16 @@ type (
 	}
 )
 
-func NewApp(name string, cfg *Config) *App {
+func NewApp(name string) *App {
 	name = genName(name, "app")
 
 	return &App{
-		name:   name,
-		config: cfg,
+		name: name,
 	}
 }
 
 func (app *App) Name() string {
 	return app.name
-}
-
-func (app *App) Config() *Config {
-	return app.config
-}
-
-func (app *App) SetConfig(cfg *Config) {
-	app.SetConfig(cfg)
 }
 
 func genName(name, defName string) string {

@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"gitlab.com/adrianpk/uavy/auth/internal/app"
+	"gitlab.com/adrianpk/uavy/auth/internal/db"
 	"gitlab.com/adrianpk/uavy/auth/pkg/base"
 	// "gitlab.com/adrianpk/uavy/auth/internal/db"
 )
@@ -23,7 +24,7 @@ var (
 )
 
 func main() {
-	cfg := base.LoadConfig()
+	cfg := app.LoadConfig()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	initExitMonitor(ctx, cancel)
@@ -38,7 +39,13 @@ func main() {
 	svc := base.NewService("auth-service")
 
 	// Database
-	// mgo := db.NewMongoClient("mongo-db", 10)
+	mgo := db.NewMongoClient("mongo-db", db.Config{
+		Host:       cfg.Mongo.Host,
+		Port:       cfg.Mongo.Port,
+		User:       cfg.Mongo.User,
+		Pass:       cfg.Mongo.Port,
+		MaxRetries: cfg.Mongo.MaxRetries,
+	})
 
 	// Repo
 	// userRepo := mongo.NewUserhRepo("user-repo", mgo)
