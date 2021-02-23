@@ -19,11 +19,11 @@ type (
 	}
 )
 
-func NewClient(name string, maxRetries uint64) (*Client, error) {
+func NewClient(name string, maxRetries uint64) *Client {
 	return &Client{
 		BaseService: base.NewService("mongo-client"),
 		maxRetries:  maxRetries,
-	}, nil
+	}
 }
 
 func (c *Client) Init() (ok chan bool) {
@@ -47,7 +47,8 @@ func (c *Client) Init() (ok chan bool) {
 }
 
 func (c *Client) Start() error {
-	panic("not implemented")
+	// Do nothing for now
+	return nil
 }
 
 func (c *Client) connect() error {
