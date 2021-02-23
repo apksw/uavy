@@ -68,9 +68,9 @@ func (app *App) Stop() {
 }
 
 func (app *App) StartJSONAPI() error {
-	p := fmt.Sprintf(":%s", app.Config.Server.JSONAPIPort)
+	p := fmt.Sprintf(":%d", app.Config.Server.JSONAPIPort)
 
-	log.Printf("JSON REST Server initializing", "port", p)
+	log.Printf("JSON API Server initializing at port %s", p)
 
 	err := http.ListenAndServe(p, app.JSONAPIRouter)
 

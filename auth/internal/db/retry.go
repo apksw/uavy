@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -53,8 +52,8 @@ func (c *Client) retryConnection() (r chan retry) {
 					return
 				}
 
-				fmt.Printf("connection attempt to Mongo failed: %s", err.Error())
-				fmt.Printf("retrying connection to Mongo in %s seconds", next.String(), "unit", "seconds")
+				log.Printf("connection attempt to Mongo failed: %s", err.Error())
+				log.Printf("retrying connection to Mongo in %s seconds", next.String())
 
 				time.Sleep(next)
 
