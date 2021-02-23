@@ -8,7 +8,6 @@ type (
 	Endpoint struct {
 		name    string
 		service Service
-		tracer  *Tracer
 	}
 )
 

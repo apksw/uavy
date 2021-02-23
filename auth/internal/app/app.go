@@ -11,9 +11,13 @@ import (
 )
 
 type (
+	// App description
 	App struct {
 		*base.App
 		JSONAPIEndpoint *jsonapi.Endpoint
+		// NOTE: Eventually:
+		// WebEndpoint     *web.Endpoint
+		// GRPCServer      *grpc.Server
 	}
 )
 

@@ -33,14 +33,14 @@ func main() {
 		exit(err)
 	}
 
+	// Service
+	svc := base.NewService("auth-service")
+
 	// Repo
 	//authRepo := repo.NewAuthRepo("auth-repo")
 
-	// Core
-	svc := base.NewService("auth-service")
-
 	// Service dependencies
-	//svc.AuthRepo = authRepo
+	//service.AuthRepo = authRepo
 
 	// App dependencies
 	a.JSONAPIEndpoint.SetService(svc)

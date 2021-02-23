@@ -12,6 +12,7 @@ import (
 )
 
 type (
+	// App description
 	App struct {
 		name     string
 		revision string
@@ -19,13 +20,16 @@ type (
 		// Config
 		config *Config
 
-		// Health
-		ready bool
-		alive bool
+		// Service
+		Service Service
 
 		// Routers
 		JSONAPIRouter *Router
-		WebRouter     *Router
+		WEBRouter     *Router
+
+		// Health
+		ready bool
+		alive bool
 
 		// Misc
 		cancel context.CancelFunc

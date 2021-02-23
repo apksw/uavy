@@ -2,28 +2,18 @@ package base
 
 type (
 	Service interface {
-		Name() string
+		Worker
 	}
 )
 
 type (
 	BaseService struct {
-		name string
+		*BaseWorker
 	}
 )
 
 func NewService(name string) *BaseService {
-	name = genName(name, "service")
-
 	return &BaseService{
-		name: name,
+		BaseWorker: NewWorker(name),
 	}
-}
-
-func (bs BaseService) Name() string {
-	return bs.name
-}
-
-func (bs BaseService) SetName(name string) {
-	bs.name = name
 }
