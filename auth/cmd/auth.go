@@ -44,6 +44,7 @@ func main() {
 		Port:       cfg.Mongo.Port,
 		User:       cfg.Mongo.User,
 		Pass:       cfg.Mongo.Pass,
+		Database:   cfg.Mongo.Database,
 		MaxRetries: cfg.Mongo.MaxRetriesUInt64(),
 	})
 

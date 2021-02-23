@@ -23,6 +23,7 @@ type (
 		Port       int
 		User       string
 		Pass       string
+		Database   string
 		MaxRetries uint64
 	}
 )

@@ -17,6 +17,7 @@ type (
 		Port       int
 		User       string
 		Pass       string
+		Database   string
 		MaxRetries int
 	}
 )
@@ -32,6 +33,7 @@ func LoadConfig() *Config {
 	flag.IntVar(&c.Mongo.Port, "mongo-port", 8081, "Mongo port")
 	flag.StringVar(&c.Mongo.User, "mongo-user", "", "Mongo user")
 	flag.StringVar(&c.Mongo.Pass, "mongo-pass", "", "Mongo pass")
+	flag.StringVar(&c.Mongo.Database, "mongo-database", "", "Mongo database")
 	flag.IntVar(&c.Mongo.MaxRetries, "mongo-max-reties", 10, "Mongo port")
 
 	return c
