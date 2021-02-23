@@ -30,14 +30,6 @@ func NewEndpoint(name string) (*Endpoint, error) {
 	}, nil
 }
 
-func (ep *Endpoint) Service() base.Service {
-	return ep.Service()
-}
-
-func (ep *Endpoint) SetService(s base.Service) {
-	ep.SetService(s)
-}
-
 func (ep *Endpoint) getSlug(r *http.Request) (slug string, err error) {
 	ctx := r.Context()
 
