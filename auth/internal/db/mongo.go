@@ -2,7 +2,7 @@
 // for exponential backoff connection retries and base.Service interface
 // implementation.
 // TODO: Replace logging by tracing data.
-package mongo
+package db
 
 import (
 	"fmt"
@@ -19,7 +19,9 @@ type (
 	}
 )
 
-func NewClient(name string, maxRetries uint64) *Client {
+// NewMongoClient
+// NOTE: Other config parametes should be passed
+func NewMongoClient(name string, maxRetries uint64) *Client {
 	return &Client{
 		BaseService: base.NewService("mongo-client"),
 		maxRetries:  maxRetries,

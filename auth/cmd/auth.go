@@ -9,6 +9,7 @@ import (
 
 	"gitlab.com/adrianpk/uavy/auth/internal/app"
 	"gitlab.com/adrianpk/uavy/auth/pkg/base"
+	// "gitlab.com/adrianpk/uavy/auth/internal/db"
 )
 
 type contextKey string
@@ -25,7 +26,7 @@ func main() {
 	cfg := base.LoadConfig()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	initStopMonitor(ctx, cancel)
+	initExitMonitor(ctx, cancel)
 
 	// App
 	a, err := app.NewApp(appName, cfg)
@@ -36,11 +37,16 @@ func main() {
 	// Service
 	svc := base.NewService("auth-service")
 
+	// Database
+	// mgo := db.NewMongoClient("mongo-db", 10)
+
 	// Repo
-	//authRepo := repo.NewAuthRepo("auth-repo")
+	// userRepo := mongo.NewUserhRepo("user-repo", mgo)
+	// authRepo := mongo.NewAuthRepo("auth-repo", mgo)
 
 	// Service dependencies
-	//service.AuthRepo = authRepo
+	// svc.UserRepo = authRepo
+	// svc.AuthRepo = authRepo
 
 	// App dependencies
 	a.JSONAPIEndpoint.SetService(svc)
@@ -59,7 +65,7 @@ func exit(err error) {
 	os.Exit(1)
 }
 
-func initStopMonitor(ctx context.Context, cancel context.CancelFunc) {
+func initExitMonitor(ctx context.Context, cancel context.CancelFunc) {
 	go checkSigterm(cancel)
 	go checkCancel(ctx)
 }
