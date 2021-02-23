@@ -9,8 +9,8 @@ import (
 
 	"gitlab.com/adrianpk/uavy/auth/internal/app"
 	"gitlab.com/adrianpk/uavy/auth/internal/db"
-	"gitlab.com/adrianpk/uavy/auth/pkg/base"
-	// "gitlab.com/adrianpk/uavy/auth/internal/db"
+	"gitlab.com/adrianpk/uavy/auth/internal/repo/mongo"
+	"gitlab.com/adrianpk/uavy/auth/internal/service"
 )
 
 type contextKey string
@@ -36,23 +36,23 @@ func main() {
 	}
 
 	// Service
-	svc := base.NewService("auth-service")
+	svc := service.NewAuth("auth-service")
 
 	// Database
 	mgo := db.NewMongoClient("mongo-db", db.Config{
 		Host:       cfg.Mongo.Host,
 		Port:       cfg.Mongo.Port,
 		User:       cfg.Mongo.User,
-		Pass:       cfg.Mongo.Port,
-		MaxRetries: cfg.Mongo.MaxRetries,
+		Pass:       cfg.Mongo.Pass,
+		MaxRetries: cfg.Mongo.MaxRetriesUInt64(),
 	})
 
 	// Repo
-	// userRepo := mongo.NewUserhRepo("user-repo", mgo)
+	userRepo := mongo.NewUserRepo("user-repo", mgo)
 	// authRepo := mongo.NewAuthRepo("auth-repo", mgo)
 
 	// Service dependencies
-	// svc.UserRepo = authRepo
+	svc.UserRepo = userRepo
 	// svc.AuthRepo = authRepo
 
 	// App dependencies

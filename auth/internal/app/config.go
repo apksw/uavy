@@ -36,3 +36,7 @@ func LoadConfig() *Config {
 
 	return c
 }
+
+func (m *Mongo) MaxRetriesUInt64() uint64 {
+	return uint64(m.MaxRetries)
+}
