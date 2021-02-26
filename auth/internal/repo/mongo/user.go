@@ -4,29 +4,38 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gitlab.com/adrianpk/uavy/auth/internal/db"
 	"gitlab.com/adrianpk/uavy/auth/internal/model"
-	"gitlab.com/adrianpk/uavy/auth/pkg/base"
 )
 
 type (
-	// UserRepo interface
 	UserRepo struct {
-		*base.BaseWorker
-		db *db.Client
+		*Repo
 	}
 )
 
-func NewUserRepo(name string, db *db.Client) *UserRepo {
+const userColl = "users"
+
+func NewUserRepo(name string, conn *db.Client) *UserRepo {
 	return &UserRepo{
-		BaseWorker: base.NewWorker(name),
-		db:         db,
+		Repo: NewRepo(name, conn, userColl),
 	}
 }
 
 func (ur *UserRepo) Create(ctx context.Context, user *model.User) error {
+	coll, err := ur.Collection()
+	if err != nil {
+		return err
+	}
+
+	_, err = coll.InsertOne(context.TODO(), user)
+	if err != nil {
+		return fmt.Errorf("repo create error: %v", err)
+	}
+
 	return nil
 }
 
