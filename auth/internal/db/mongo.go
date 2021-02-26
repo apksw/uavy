@@ -75,6 +75,10 @@ func (c *Client) connect() error {
 }
 
 func (c *Client) URL() string {
-	// FIX: Get value from configuration
-	return "mongodb://localhost:27016"
+	cfg := c.config
+	return fmt.Sprintf("mongodb://%s:%s@%s:%d/auth?authSource=admin", cfg.User, cfg.Pass, cfg.Host, cfg.Port)
+}
+
+func (c *Client) Db() string {
+	return c.config.Database
 }

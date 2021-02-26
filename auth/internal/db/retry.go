@@ -19,6 +19,7 @@ type (
 )
 
 func (c *Client) retryConnection() (r chan retry) {
+	r = make(chan retry)
 	bo := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), c.config.MaxRetries)
 
 	go func() {
@@ -56,11 +57,10 @@ func (c *Client) retryConnection() (r chan retry) {
 				log.Printf("retrying connection to Mongo in %s seconds", next.String())
 
 				time.Sleep(next)
-
-			} else {
-				r <- retry{client, nil}
-				return
+				continue
 			}
+
+			r <- retry{client, nil}
 		}
 	}()
 
