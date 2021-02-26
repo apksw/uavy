@@ -18,7 +18,6 @@ build-test:
 
 test:
 	docker-compose down
-	rm -rf ./_data
-	docker-compose build --force-recreate --no-cache
-	docker-compose up
+	sudo rm -rf ./_data
+	docker-compose up --force-recreate --build
 
