@@ -76,7 +76,8 @@ func (c *Client) connect() error {
 
 func (c *Client) URL() string {
 	cfg := c.config
-	return fmt.Sprintf("mongodb://%s:%s@%s:%d/auth?authSource=admin", cfg.User, cfg.Pass, cfg.Host, cfg.Port)
+	return fmt.Sprintf("mongodb://%s:%s@%s:%d/auth?authSource=admin", cfg.User,
+		cfg.Pass, cfg.Host, cfg.Port)
 }
 
 func (c *Client) Db() string {

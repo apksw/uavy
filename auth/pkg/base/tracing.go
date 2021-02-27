@@ -1,6 +1,7 @@
 package base
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -9,8 +10,8 @@ type (
 	Trace struct {
 		timestamp time.Time
 		level     string
-		traceType string
 		data      interface{}
+		tags      []string
 	}
 
 	traces struct {
@@ -25,6 +26,12 @@ type (
 		traces  *traces
 		tracing bool
 	}
+)
+
+const (
+	debugTrace = "debug"
+	infoTrace  = "info"
+	errorTrace = "error"
 )
 
 func newTraces() *traces {
@@ -43,9 +50,14 @@ func (t Trace) Level() string {
 	return t.level
 }
 
-// Type return trace type
-func (t Trace) Type() string {
-	return t.traceType
+// Tags return trace type
+func (t Trace) Tags() []string {
+	return t.tags
+}
+
+// String return a string representation of the trace
+func (t Trace) String() string {
+	return fmt.Sprintf("[%s] %s", t.level, t.data)
 }
 
 // Data returns trace data
@@ -86,6 +98,7 @@ func (traces *traces) all() []Trace {
 
 // EnableTracing enables tracing mode
 func (t *Tracer) EnableTracing() {
+	t.traces = newTraces()
 	t.tracing = true
 }
 
@@ -95,14 +108,26 @@ func (t *Tracer) DisableTracing() {
 	t.tracing = false
 }
 
-func (t *Tracer) saveTracingData(data, level, tracingType string) {
+func (t *Tracer) SendDebug(data interface{}, tags ...string) {
+	t.SendTrace(debugTrace, data, tags...)
+}
+
+func (t *Tracer) SendInfo(data interface{}, tags ...string) {
+	t.SendTrace(infoTrace, data, tags...)
+}
+
+func (t *Tracer) SendError(data interface{}, tags ...string) {
+	t.SendTrace(errorTrace, data, tags...)
+}
+
+func (t *Tracer) SendTrace(level string, data interface{}, tags ...string) {
 	if t.tracing {
 		t.SaveTrace(
 			Trace{
 				timestamp: time.Now(),
 				level:     level,
-				traceType: tracingType,
 				data:      data,
+				tags:      tags,
 			})
 	}
 }
@@ -112,13 +137,27 @@ func (t *Tracer) IsTracingEnabled() bool {
 }
 
 func (t *Tracer) SaveTrace(trace Trace) {
+	//if !t.tracing {
+	//return
+	//}
+
+	t.ensureTraces()
+	t.traces.lastTrace = trace
 	t.traces.push(trace)
 }
 
 func (t *Tracer) LastEntry() Trace {
+	t.ensureTraces()
 	return t.traces.last()
 }
 
 func (t *Tracer) LastEntries() []Trace {
+	t.ensureTraces()
 	return t.traces.all()
+}
+
+func (t *Tracer) ensureTraces() {
+	if t.traces == nil {
+		t.traces = newTraces()
+	}
 }

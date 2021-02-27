@@ -1,4 +1,3 @@
-// NOTE: WIP, a lot in common with Service
 package base
 
 type (
@@ -14,6 +13,7 @@ type (
 		name     string
 		didInit  bool
 		didStart bool
+		Tracer
 	}
 )
 
