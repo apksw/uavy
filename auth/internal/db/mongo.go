@@ -19,12 +19,13 @@ type (
 	}
 
 	Config struct {
-		Host       string
-		Port       int
-		User       string
-		Pass       string
-		Database   string
-		MaxRetries uint64
+		Host         string
+		Port         int
+		User         string
+		Pass         string
+		Database     string
+		MaxRetries   uint64
+		TracingLevel string
 	}
 )
 
@@ -32,7 +33,7 @@ type (
 // NOTE: Other config parametes should be passed
 func NewMongoClient(name string, cfg Config) *Client {
 	return &Client{
-		BaseService: base.NewService("mongo-client"),
+		BaseService: base.NewService("mongo-client", cfg.TracingLevel),
 		config:      cfg,
 	}
 }

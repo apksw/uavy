@@ -11,7 +11,6 @@ type (
 		timestamp time.Time
 		level     string
 		data      interface{}
-		tags      []string
 	}
 
 	traces struct {
@@ -23,16 +22,24 @@ type (
 
 type (
 	Tracer struct {
-		traces  *traces
-		tracing bool
+		traces *traces
+		level  string
 	}
 )
 
 const (
+	noneTrace  = "none"
 	debugTrace = "debug"
 	infoTrace  = "info"
 	errorTrace = "error"
 )
+
+func NewTracer(level string) *Tracer {
+	return &Tracer{
+		traces: newTraces(),
+		level:  level,
+	}
+}
 
 func newTraces() *traces {
 	return &traces{
@@ -48,11 +55,6 @@ func (t Trace) Timestamp() time.Time {
 // Level returns trace level
 func (t Trace) Level() string {
 	return t.level
-}
-
-// Tags return trace type
-func (t Trace) Tags() []string {
-	return t.tags
 }
 
 // String return a string representation of the trace
@@ -99,29 +101,41 @@ func (traces *traces) all() []Trace {
 // EnableTracing enables tracing mode
 func (t *Tracer) EnableTracing() {
 	t.traces = newTraces()
-	t.tracing = true
+	t.level = infoTrace
 }
 
 // DisableTracing disables tracing mode
 func (t *Tracer) DisableTracing() {
 	t.traces = newTraces()
-	t.tracing = false
+	t.level = noneTrace
 }
 
-func (t *Tracer) SendDebug(data interface{}, tags ...string) {
-	t.SendTrace(debugTrace, data, tags...)
+func (t *Tracer) SendDebug(data interface{}) {
+	t.SendTrace(debugTrace, data)
 }
 
-func (t *Tracer) SendInfo(data interface{}, tags ...string) {
-	t.SendTrace(infoTrace, data, tags...)
+func (t *Tracer) SendDebugf(format string, data ...interface{}) {
+	t.SendDebug(fmt.Sprintf(format, data...))
 }
 
-func (t *Tracer) SendError(data interface{}, tags ...string) {
-	t.SendTrace(errorTrace, data, tags...)
+func (t *Tracer) SendInfo(data interface{}) {
+	t.SendTrace(infoTrace, data)
+}
+
+func (t *Tracer) SendInfof(format string, data ...interface{}) {
+	t.SendInfo(fmt.Sprintf(format, data...))
+}
+
+func (t *Tracer) SendError(data interface{}) {
+	t.SendTrace(errorTrace, data)
+}
+
+func (t *Tracer) SendErrorf(format string, data ...interface{}) {
+	t.SendError(fmt.Sprintf(format, data...))
 }
 
 func (t *Tracer) SendTrace(level string, data interface{}, tags ...string) {
-	if !t.tracing {
+	if !t.IsTracingEnabled() {
 		return
 	}
 
@@ -131,38 +145,29 @@ func (t *Tracer) SendTrace(level string, data interface{}, tags ...string) {
 			timestamp: time.Now(),
 			level:     level,
 			data:      data,
-			tags:      tags,
 		})
 }
 
 func (t *Tracer) IsTracingEnabled() bool {
-	return t.tracing
+	return t.level != noneTrace
 }
 
 func (t *Tracer) SaveTrace(trace Trace) {
-	if !t.tracing {
+	if !t.IsTracingEnabled() {
 		return
 	}
 
-	t.ensureTraces()
 	t.traces.push(trace)
 }
 
 func (t *Tracer) LastEntry() Trace {
-	t.ensureTraces()
 	return t.traces.last()
 }
 
 func (t *Tracer) LastEntries() []Trace {
-	t.ensureTraces()
 	return t.traces.all()
 }
 
-func (t *Tracer) ensureTraces() {
-	t.traces.Lock()
-	defer t.traces.Unlock()
-
-	if t.traces == nil {
-		t.traces = newTraces()
-	}
+func (t *Tracer) PrintTracerStack() {
+	fmt.Printf("%+v\n", t.LastEntries())
 }

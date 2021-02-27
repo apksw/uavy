@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -28,19 +27,19 @@ func (c *Client) retryConnection() (r chan retry) {
 		url := c.URL()
 
 		for i := 0; i <= int(c.config.MaxRetries); i++ {
-			log.Println("dialing to Mongo", "host", url)
+			c.SendInfof("dialing to mongo at %s\n", url)
 
 			opts := options.Client().ApplyURI(url)
 
 			client, err := mongo.Connect(context.TODO(), opts)
 			if err != nil {
-				log.Printf("mongo connection error: %s", err.Error())
+				c.SendInfof("mongo connection error: %v\n", err)
 			}
 
 			err = client.Ping(context.TODO(), nil)
 
 			if err != nil {
-				log.Printf("mongo ping error: %s", err.Error())
+				c.SendInfof("mongo ping error: %v\n", err)
 
 				// Backoff
 				next := bo.NextBackOff()
@@ -53,8 +52,8 @@ func (c *Client) retryConnection() (r chan retry) {
 					return
 				}
 
-				log.Printf("connection attempt to Mongo failed: %s", err.Error())
-				log.Printf("retrying connection to Mongo in %s seconds", next.String())
+				c.SendInfof("connection attempt to Mongo failed: %v\n", err)
+				c.SendInfof("retrying connection to Mongo in %s seconds\n", next.String())
 
 				time.Sleep(next)
 				continue

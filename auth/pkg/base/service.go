@@ -12,8 +12,8 @@ type (
 	}
 )
 
-func NewService(name string) *BaseService {
+func NewService(name string, tracingLevel string) *BaseService {
 	return &BaseService{
-		BaseWorker: NewWorker(name),
+		BaseWorker: NewWorker(name, tracingLevel),
 	}
 }

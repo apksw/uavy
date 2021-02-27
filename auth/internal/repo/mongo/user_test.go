@@ -13,6 +13,12 @@ import (
 func TestCreateUser(t *testing.T) {
 	userRepo := userRepo()
 
+	// NOTE: Remove this
+	defer func() {
+		userRepo.PrintTracerStack()
+		userRepo.Conn().PrintTracerStack()
+	}()
+
 	user := &model.User{
 		Username:          "username",
 		PasswordDigest:    "jTZsh4!_XTSZZR4e",
@@ -31,21 +37,25 @@ func TestCreateUser(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot create user: %v", err)
 	}
+
 }
 
 func userRepo() *mongo.UserRepo {
 	mgo := db.NewMongoClient("mongo-db", db.Config{
-		Host:       "localhost",
-		Port:       27017,
-		User:       "auth",
-		Pass:       "auth",
-		Database:   "auth",
-		MaxRetries: uint64(3),
+		Host:         "localhost",
+		Port:         27017,
+		User:         "auth",
+		Pass:         "auth",
+		Database:     "auth",
+		MaxRetries:   uint64(3),
+		TracingLevel: "debug",
 	})
 
 	ok := mgo.Init()
 
 	<-ok
 
-	return mongo.NewUserRepo("user-repo", mgo)
+	return mongo.NewUserRepo("user-repo", mgo, mongo.Config{
+		TracingLevel: "debug",
+	})
 }

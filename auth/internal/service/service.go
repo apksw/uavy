@@ -12,8 +12,8 @@ type (
 	}
 )
 
-func NewAuth(name string) *Auth {
+func NewAuth(name string, tracingLevel string) *Auth {
 	return &Auth{
-		BaseService: base.NewService(name),
+		BaseService: base.NewService(name, tracingLevel),
 	}
 }

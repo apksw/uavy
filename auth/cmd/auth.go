@@ -26,6 +26,7 @@ var (
 func main() {
 	cfg := app.LoadConfig()
 
+	// Context
 	ctx, cancel := context.WithCancel(context.Background())
 	initExitMonitor(ctx, cancel)
 
@@ -36,20 +37,23 @@ func main() {
 	}
 
 	// Service
-	svc := service.NewAuth("auth-service")
+	svc := service.NewAuth("auth-service", cfg.Tracing.Level)
 
 	// Database
 	mgo := db.NewMongoClient("mongo-db", db.Config{
-		Host:       cfg.Mongo.Host,
-		Port:       cfg.Mongo.Port,
-		User:       cfg.Mongo.User,
-		Pass:       cfg.Mongo.Pass,
-		Database:   cfg.Mongo.Database,
-		MaxRetries: cfg.Mongo.MaxRetriesUInt64(),
+		Host:         cfg.Mongo.Host,
+		Port:         cfg.Mongo.Port,
+		User:         cfg.Mongo.User,
+		Pass:         cfg.Mongo.Pass,
+		Database:     cfg.Mongo.Database,
+		MaxRetries:   cfg.Mongo.MaxRetriesUInt64(),
+		TracingLevel: cfg.Tracing.Level,
 	})
 
 	// Repo
-	userRepo := mongo.NewUserRepo("user-repo", mgo)
+	userRepo := mongo.NewUserRepo("user-repo", mgo, mongo.Config{
+		TracingLevel: cfg.Tracing.Level,
+	})
 	// authRepo := mongo.NewAuthRepo("auth-repo", mgo)
 
 	// Service dependencies

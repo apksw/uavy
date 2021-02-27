@@ -13,15 +13,16 @@ type (
 		name     string
 		didInit  bool
 		didStart bool
-		Tracer
+		*Tracer
 	}
 )
 
-func NewWorker(name string) *BaseWorker {
+func NewWorker(name string, tracingLevel string) *BaseWorker {
 	name = genName(name, "worker")
 
 	return &BaseWorker{
-		name: name,
+		name:   name,
+		Tracer: NewTracer(tracingLevel),
 	}
 }
 

@@ -4,8 +4,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 	"gitlab.com/adrianpk/uavy/auth/internal/db"
@@ -20,12 +18,10 @@ type (
 
 const userColl = "users"
 
-func NewUserRepo(name string, conn *db.Client) *UserRepo {
+func NewUserRepo(name string, conn *db.Client, cfg Config) *UserRepo {
 	ur := &UserRepo{
-		Repo: NewRepo(name, conn, userColl),
+		Repo: NewRepo(name, conn, userColl, cfg),
 	}
-
-	ur.EnableTracing()
 
 	return ur
 }
@@ -33,18 +29,15 @@ func NewUserRepo(name string, conn *db.Client) *UserRepo {
 func (ur *UserRepo) Create(ctx context.Context, user *model.User) error {
 	coll, err := ur.Collection()
 	if err != nil {
-		ur.SendError(err)
 		return err
 	}
 
 	_, err = coll.InsertOne(context.TODO(), user)
 	if err != nil {
-		ur.SendError(err)
-		return fmt.Errorf("repo create error: %v", err)
+		return err
 	}
 
-	ur.SendDebug("user created")
-	log.Println(ur.LastEntry().String())
+	ur.SendDebugf("user created: %s", user.ID)
 
 	return nil
 }

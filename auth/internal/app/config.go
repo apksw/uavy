@@ -6,6 +6,7 @@ type (
 	Config struct {
 		Server
 		Mongo
+		Tracing
 	}
 
 	Server struct {
@@ -19,6 +20,10 @@ type (
 		Pass       string
 		Database   string
 		MaxRetries int
+	}
+
+	Tracing struct {
+		Level string
 	}
 )
 

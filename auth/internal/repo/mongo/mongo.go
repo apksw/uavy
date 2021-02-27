@@ -16,14 +16,22 @@ type (
 		conn       *db.Client
 		collection string
 	}
+
+	Config struct {
+		TracingLevel string
+	}
 )
 
-func NewRepo(name string, conn *db.Client, collection string) *Repo {
+func NewRepo(name string, conn *db.Client, collection string, cfg Config) *Repo {
 	return &Repo{
-		BaseWorker: base.NewWorker(name),
+		BaseWorker: base.NewWorker(name, cfg.TracingLevel),
 		conn:       conn,
 		collection: collection,
 	}
+}
+
+func (r *Repo) Conn() (c *db.Client) {
+	return r.conn
 }
 
 func (r *Repo) Client() (c *mongo.Client, err error) {
