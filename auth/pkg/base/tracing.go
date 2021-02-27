@@ -121,15 +121,18 @@ func (t *Tracer) SendError(data interface{}, tags ...string) {
 }
 
 func (t *Tracer) SendTrace(level string, data interface{}, tags ...string) {
-	if t.tracing {
-		t.SaveTrace(
-			Trace{
-				timestamp: time.Now(),
-				level:     level,
-				data:      data,
-				tags:      tags,
-			})
+	if !t.tracing {
+		return
 	}
+
+	// TODO: Make concurrent
+	t.SaveTrace(
+		Trace{
+			timestamp: time.Now(),
+			level:     level,
+			data:      data,
+			tags:      tags,
+		})
 }
 
 func (t *Tracer) IsTracingEnabled() bool {
@@ -137,12 +140,11 @@ func (t *Tracer) IsTracingEnabled() bool {
 }
 
 func (t *Tracer) SaveTrace(trace Trace) {
-	//if !t.tracing {
-	//return
-	//}
+	if !t.tracing {
+		return
+	}
 
 	t.ensureTraces()
-	t.traces.lastTrace = trace
 	t.traces.push(trace)
 }
 
@@ -157,6 +159,9 @@ func (t *Tracer) LastEntries() []Trace {
 }
 
 func (t *Tracer) ensureTraces() {
+	t.traces.Lock()
+	defer t.traces.Unlock()
+
 	if t.traces == nil {
 		t.traces = newTraces()
 	}

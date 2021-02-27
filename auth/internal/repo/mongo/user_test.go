@@ -2,7 +2,6 @@ package mongo_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -45,8 +44,8 @@ func userRepo() *mongo.UserRepo {
 	})
 
 	ok := mgo.Init()
-	time.Sleep(2 * time.Second)
-	fmt.Println(<-ok)
+
+	<-ok
 
 	return mongo.NewUserRepo("user-repo", mgo)
 }
