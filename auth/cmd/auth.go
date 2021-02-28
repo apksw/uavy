@@ -40,7 +40,7 @@ func main() {
 	svc := service.NewAuth("auth-service", cfg.Tracing.Level)
 
 	// Database
-	mgo := db.NewMongoClient("mongo-db", db.Config{
+	mgo := db.NewMongoClient("mongo-client", db.Config{
 		Host:         cfg.Mongo.Host,
 		Port:         cfg.Mongo.Port,
 		User:         cfg.Mongo.User,

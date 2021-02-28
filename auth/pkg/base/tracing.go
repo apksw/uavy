@@ -34,7 +34,8 @@ const (
 )
 
 const (
-	// NOTE: Make this values confifigurable?
+	// NOTE: These values must be adaptive
+	// Auto-optimize according usage load
 	size         = 1000
 	confortIndex = 0.9
 	purgeEvery   = 100 // milliseconds
@@ -63,9 +64,29 @@ func (t Trace) Level() string {
 	return t.level
 }
 
+// FormattedTimestamp returns trace timestamp
+func (t Trace) FormattedTimestamp() string {
+	return t.Timestamp().Format(time.RFC3339)
+}
+
+// FormattedLevel returns a formatted trace level
+func (t Trace) FormattedLevel() string {
+	switch t.level {
+	case debugTrace:
+		return "DEBUG"
+	case infoTrace:
+		return "INFO "
+	case errorTrace:
+		return "ERROR"
+	default:
+		return "     "
+	}
+}
+
 // String return a string representation of the trace
 func (t Trace) String() string {
-	return fmt.Sprintf("[%s] %s", t.level, t.data)
+	return fmt.Sprintf("%s %s - %s", t.FormattedTimestamp(), t.FormattedLevel(),
+		t.data)
 }
 
 // Data returns trace data

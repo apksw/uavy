@@ -33,7 +33,7 @@ type (
 // NOTE: Other config parametes should be passed
 func NewMongoClient(name string, cfg Config) *Client {
 	return &Client{
-		BaseService: base.NewService("mongo-client", cfg.TracingLevel),
+		BaseService: base.NewService(name, cfg.TracingLevel),
 		config:      cfg,
 	}
 }
@@ -50,7 +50,7 @@ func (c *Client) Init() (ok chan bool) {
 			return
 		}
 
-		c.SendInfof("%s servuce initialized", c.Name())
+		c.SendInfof("%s service initialized", c.Name())
 
 		ok <- true
 	}()
