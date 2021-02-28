@@ -36,7 +36,7 @@ const (
 const (
 	// NOTE: These values must be adaptive
 	// Auto-optimize according usage load
-	size         = 1000
+	size         = 100
 	confortIndex = 0.9
 	purgeEvery   = 100 // milliseconds
 )
@@ -144,6 +144,7 @@ func (t *Tracer) SendTrace(level string, data interface{}, tags ...string) {
 		return
 	}
 
+	// TODO: Make concurrent
 	go func() {
 		t.SaveTrace(
 			Trace{
