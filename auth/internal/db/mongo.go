@@ -50,7 +50,7 @@ func (c *Client) Init() (ok chan bool) {
 			return
 		}
 
-		fmt.Printf("%s service initializated", c.Name())
+		c.SendInfof("%s servuce initialized", c.Name())
 
 		ok <- true
 	}()

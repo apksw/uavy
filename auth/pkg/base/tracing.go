@@ -2,28 +2,27 @@ package base
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
 
 type (
+	// Trace description
 	Trace struct {
 		timestamp time.Time
 		level     string
 		data      interface{}
 	}
-
-	traces struct {
-		sync.Mutex
-		lastTrace Trace
-		allTraces []Trace
-	}
 )
 
 type (
+	// Tracer description
 	Tracer struct {
-		traces *traces
+		mutex  sync.Mutex
 		level  string
+		traces chan Trace
+		quit   chan struct{}
 	}
 )
 
@@ -34,17 +33,24 @@ const (
 	errorTrace = "error"
 )
 
-func NewTracer(level string) *Tracer {
-	return &Tracer{
-		traces: newTraces(),
-		level:  level,
-	}
-}
+const (
+	// NOTE: Make this values confifigurable?
+	size         = 1000
+	confortIndex = 0.9
+	purgeEvery   = 100 // milliseconds
+)
 
-func newTraces() *traces {
-	return &traces{
-		allTraces: []Trace{},
+// NewTracer build and returns a new Tracer instance
+func NewTracer(level string) *Tracer {
+	t := &Tracer{
+		level:  level,
+		traces: make(chan Trace, size),
+		quit:   make(chan struct{}),
 	}
+
+	go t.startHealer()
+
+	return t
 }
 
 // Timestamp returns trace timestamp
@@ -68,46 +74,44 @@ func (t Trace) Data() interface{} {
 }
 
 // Tracing queue
-func (traces *traces) last() Trace {
-	return traces.lastTrace
+func (t *Tracer) push(trace Trace) {
+	t.traces <- trace
 }
 
-func (traces *traces) push(trace Trace) {
-	traces.Lock()
-	defer traces.Unlock()
-
-	traces.lastTrace = trace
-	traces.allTraces = append(traces.allTraces, trace)
+func (t *Tracer) pull() (trace Trace) {
+	return <-t.traces
 }
 
-func (traces *traces) pull() (trace Trace) {
-	traces.Lock()
-	defer traces.Unlock()
+func (t *Tracer) currentTraces() []Trace {
+	traces := []Trace{}
 
-	all := traces.allTraces
-	l := len(all) - 1
+	for i := 0; i < len(t.traces); i++ {
+		traces = append(traces, <-t.traces)
+	}
 
-	trace, traces.allTraces = all[l], all[:l]
-
-	return trace
-}
-
-func (traces *traces) all() []Trace {
-	return traces.allTraces
+	return traces
 }
 
 // Tracer
 
 // EnableTracing enables tracing mode
 func (t *Tracer) EnableTracing() {
-	t.traces = newTraces()
+	t.mutex.Lock()
 	t.level = infoTrace
+	t.traces = make(chan Trace, size)
+	t.quit = make(chan struct{})
+	t.startHealer()
+	t.mutex.Unlock()
 }
 
 // DisableTracing disables tracing mode
 func (t *Tracer) DisableTracing() {
-	t.traces = newTraces()
+	t.mutex.Lock()
+	t.quit <- struct{}{}
+	close(t.quit)
 	t.level = noneTrace
+	t.traces = make(chan Trace, size)
+	t.mutex.Unlock()
 }
 
 func (t *Tracer) SendDebug(data interface{}) {
@@ -157,17 +161,50 @@ func (t *Tracer) SaveTrace(trace Trace) {
 		return
 	}
 
-	t.traces.push(trace)
-}
-
-func (t *Tracer) LastEntry() Trace {
-	return t.traces.last()
-}
-
-func (t *Tracer) LastEntries() []Trace {
-	return t.traces.all()
+	select {
+	case t.traces <- trace:
+		// Sent is enough
+	default:
+		// Nothing to do
+	}
 }
 
 func (t *Tracer) PrintTracerStack() {
-	fmt.Printf("%+v\n", t.LastEntries())
+	for _, t := range t.currentTraces() {
+		log.Printf("%+v\n", t)
+	}
+}
+
+func (t *Tracer) startHealer() {
+	max := roundDown(float64(size) * float64(confortIndex))
+	qtyToDequeue := size - max
+
+	ticker := time.NewTicker(purgeEvery * time.Millisecond)
+
+	for {
+		select {
+		case <-ticker.C:
+			if len(t.traces) >= max {
+				for i := 0; i == qtyToDequeue; i++ {
+
+					select {
+					case <-t.traces:
+						// Receive is enough
+					default:
+						// Nothing to do
+					}
+
+				}
+			}
+		case <-t.quit:
+			return
+		}
+	}
+}
+
+func roundDown(val float64) int {
+	if val < 0 {
+		return int(val - 1.0)
+	}
+	return int(val)
 }
