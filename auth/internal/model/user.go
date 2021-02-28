@@ -18,7 +18,7 @@ type (
 		LastIP            string       `bson:"last_ip"`
 		ConfirmationToken string       `bson:"confirmation_token"`
 		IsConfirmed       bool         `bson:"is_confirmed"`
-		GeoLocation       base.GeoJson `bson:"geolocations"`
+		Geolocation       base.GeoJson `bson:"geolocation"`
 		StartsAt          time.Time    `bson:"starts_at"`
 		EndsAt            time.Time    `bson:"ends_at"`
 		IsActive          bool         `bson:"is_active"`
