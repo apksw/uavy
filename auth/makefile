@@ -10,7 +10,7 @@ build:
 unit-test:
 	@echo "FIX: execute only unit tests"
 	go clean -testcache
-	go test ./...
+	go test ./... -v
 
 build-test:
 	docker build -t $(IMAGE_NAME):$(DEV_TAG) -f Dockerfile.test .
