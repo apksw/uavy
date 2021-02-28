@@ -27,10 +27,10 @@ type (
 )
 
 const (
-	noneTrace  = "none"
-	debugTrace = "debug"
-	infoTrace  = "info"
-	errorTrace = "error"
+	noneLevel  = "none"
+	debugLevel = "debug"
+	infoLevel  = "info"
+	errorLevel = "error"
 )
 
 const (
@@ -72,11 +72,11 @@ func (t Trace) FormattedTimestamp() string {
 // FormattedLevel returns a formatted trace level
 func (t Trace) FormattedLevel() string {
 	switch t.level {
-	case debugTrace:
+	case debugLevel:
 		return "DEBUG"
-	case infoTrace:
+	case infoLevel:
 		return "INFO "
-	case errorTrace:
+	case errorLevel:
 		return "ERROR"
 	default:
 		return "     "
@@ -115,28 +115,8 @@ func (t *Tracer) currentTraces() []Trace {
 
 // Tracer
 
-// EnableTracing enables tracing mode
-func (t *Tracer) EnableTracing() {
-	t.mutex.Lock()
-	t.level = infoTrace
-	t.traces = make(chan Trace, size)
-	t.quit = make(chan struct{})
-	t.startHealer()
-	t.mutex.Unlock()
-}
-
-// DisableTracing disables tracing mode
-func (t *Tracer) DisableTracing() {
-	t.mutex.Lock()
-	t.quit <- struct{}{}
-	close(t.quit)
-	t.level = noneTrace
-	t.traces = make(chan Trace, size)
-	t.mutex.Unlock()
-}
-
 func (t *Tracer) SendDebug(data interface{}) {
-	t.SendTrace(debugTrace, data)
+	t.SendTrace(debugLevel, data)
 }
 
 func (t *Tracer) SendDebugf(format string, data ...interface{}) {
@@ -144,7 +124,7 @@ func (t *Tracer) SendDebugf(format string, data ...interface{}) {
 }
 
 func (t *Tracer) SendInfo(data interface{}) {
-	t.SendTrace(infoTrace, data)
+	t.SendTrace(infoLevel, data)
 }
 
 func (t *Tracer) SendInfof(format string, data ...interface{}) {
@@ -152,7 +132,7 @@ func (t *Tracer) SendInfof(format string, data ...interface{}) {
 }
 
 func (t *Tracer) SendError(data interface{}) {
-	t.SendTrace(errorTrace, data)
+	t.SendTrace(errorLevel, data)
 }
 
 func (t *Tracer) SendErrorf(format string, data ...interface{}) {
@@ -164,17 +144,18 @@ func (t *Tracer) SendTrace(level string, data interface{}, tags ...string) {
 		return
 	}
 
-	// TODO: Make concurrent
-	t.SaveTrace(
-		Trace{
-			timestamp: time.Now(),
-			level:     level,
-			data:      data,
-		})
+	go func() {
+		t.SaveTrace(
+			Trace{
+				timestamp: time.Now(),
+				level:     level,
+				data:      data,
+			})
+	}()
 }
 
 func (t *Tracer) IsTracingEnabled() bool {
-	return t.level != noneTrace
+	return t.level != noneLevel
 }
 
 func (t *Tracer) SaveTrace(trace Trace) {
@@ -188,6 +169,42 @@ func (t *Tracer) SaveTrace(trace Trace) {
 	default:
 		// Nothing to do
 	}
+}
+
+func (t *Tracer) ToNone() {
+	t.level = noneLevel
+}
+
+func (t *Tracer) ToDebug() {
+	t.level = debugLevel
+}
+
+func (t *Tracer) ToInfo() {
+	t.level = infoLevel
+}
+
+func (t *Tracer) ToError() {
+	t.level = errorLevel
+}
+
+// EnableTracing enables tracing
+func (t *Tracer) EnableTracing() {
+	t.mutex.Lock()
+	t.level = infoLevel
+	t.traces = make(chan Trace, size)
+	t.quit = make(chan struct{})
+	t.startHealer()
+	t.mutex.Unlock()
+}
+
+// DisableTracing disables tracing
+func (t *Tracer) DisableTracing() {
+	t.mutex.Lock()
+	t.quit <- struct{}{}
+	close(t.quit)
+	t.level = noneLevel
+	t.traces = make(chan Trace, size)
+	t.mutex.Unlock()
 }
 
 func (t *Tracer) PrintTracerStack() {
