@@ -2,6 +2,7 @@ package mongo_test
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -9,6 +10,13 @@ import (
 	"gitlab.com/adrianpk/uavy/auth/internal/model"
 	"gitlab.com/adrianpk/uavy/auth/internal/repo/mongo"
 	"gitlab.com/adrianpk/uavy/auth/pkg/base"
+)
+
+type (
+	test struct {
+		name     string
+		function func(*testing.T)
+	}
 )
 
 var (
@@ -30,20 +38,42 @@ var (
 	}
 )
 
-func TestCreateUser(t *testing.T) {
-	userRepo := userRepo()
+var (
+	ur *mongo.UserRepo
+)
 
+func TestMain(m *testing.M) {
+	setup()
+	code := m.Run()
+	os.Exit(code)
+}
+
+func TestBase(t *testing.T) {
+	setup()
+	suite := []test{
+		newTest("TestCreateUser", testCreateUser),
+		newTest("TestGetAllUsers", testGetAllUsers),
+	}
+
+	for _, test := range suite {
+		t.Run(test.name, test.function)
+	}
+
+	shutdown()
+}
+
+func testCreateUser(t *testing.T) {
 	// NOTE: Defer can be removed
 	defer func() {
-		userRepo.PrintTracerStack()
-		userRepo.Conn().PrintTracerStack()
+		//ur.PrintTracerStack()
+		//ur.Conn().PrintTracerStack()
 	}()
 
 	user := &validUserData
 
-	err := userRepo.Create(context.TODO(), user)
+	err := ur.Create(context.TODO(), user)
 	if err != nil {
-		t.Errorf("cannot create user: %v", err)
+		t.Errorf("CreateUser error: %v", err)
 	}
 
 	ok, diff := valuesMatch(&validUserData, user)
@@ -52,7 +82,35 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
+func testGetAllUsers(t *testing.T) {
+	// NOTE: Defer can be removed
+	defer func() {
+		//ur.PrintTracerStack()
+		//ur.Conn().PrintTracerStack()
+	}()
+
+	users, err := ur.GetAll(context.TODO())
+	if err != nil {
+		t.Errorf("GetAll users error: %v", err)
+	}
+
+	t.Logf("Users: %+v", users)
+}
+
 // Helpers
+// Setup
+
+func setup() {
+	ur = getUserRepo()
+}
+
+func shutdown() {
+	clear()
+}
+
+func newTest(name string, function func(*testing.T)) test {
+	return test{name: name, function: function}
+}
 
 func valuesMatch(user, toCompare *model.User) (ok bool, diff []string) {
 	diff = []string{}
@@ -112,7 +170,16 @@ func valuesMatch(user, toCompare *model.User) (ok bool, diff []string) {
 	return len(diff) == 0, diff
 }
 
-func userRepo() *mongo.UserRepo {
+func clear() error {
+	coll, err := ur.Collection()
+	if err != nil {
+		return err
+	}
+
+	return coll.Drop(context.TODO())
+}
+
+func getUserRepo() *mongo.UserRepo {
 	mgo := db.NewMongoClient("mongo-db", db.Config{
 		Host:         "localhost",
 		Port:         27017,
