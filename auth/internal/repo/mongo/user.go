@@ -51,7 +51,7 @@ func (ur *UserRepo) GetAll(ctx context.Context) (users []*model.User, err error)
 	}
 
 	opts := options.Find()
-	opts.SetLimit(2)
+	// opts.SetLimit(2)
 
 	cur, err := coll.Find(context.TODO(), bson.D{{}}, opts)
 	if err != nil {

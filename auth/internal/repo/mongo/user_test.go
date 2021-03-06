@@ -19,6 +19,10 @@ type (
 	}
 )
 
+const (
+	printTrace = false
+)
+
 var (
 	validUserData = model.User{
 		Username:          "username",
@@ -33,6 +37,23 @@ var (
 		},
 		StartsAt:  time.Date(2021, 02, 28, 22, 19, 58, 151387237, time.UTC),
 		EndsAt:    time.Date(2022, 02, 28, 22, 19, 58, 151387237, time.UTC),
+		IsActive:  true,
+		IsDeleted: false,
+	}
+
+	validUserData2 = model.User{
+		Username:          "username2",
+		PasswordDigest:    "ak/-6qt2=.KpM6G.",
+		Email:             "username2mail.com",
+		LastIP:            "168.164.110.11",
+		ConfirmationToken: "310b5450-1e2f-4e49-8db4-b614cad05650",
+		IsConfirmed:       true,
+		Geolocation: base.GeoJson{
+			Type:        "Point",
+			Coordinates: []float64{52.3864562, 21.0098221, 15},
+		},
+		StartsAt:  time.Date(2021, 03, 04, 21, 11, 22, 251397443, time.UTC),
+		EndsAt:    time.Date(2022, 03, 04, 21, 11, 22, 251397443, time.UTC),
 		IsActive:  true,
 		IsDeleted: false,
 	}
@@ -56,6 +77,7 @@ func TestBase(t *testing.T) {
 	}
 
 	for _, test := range suite {
+		clear()
 		t.Run(test.name, test.function)
 	}
 
@@ -63,12 +85,11 @@ func TestBase(t *testing.T) {
 }
 
 func testCreateUser(t *testing.T) {
-	// NOTE: Defer can be removed
 	defer func() {
-		//ur.PrintTracerStack()
-		//ur.Conn().PrintTracerStack()
+		printTracerStack()
 	}()
 
+	// Test
 	user := &validUserData
 
 	err := ur.Create(context.TODO(), user)
@@ -83,23 +104,37 @@ func testCreateUser(t *testing.T) {
 }
 
 func testGetAllUsers(t *testing.T) {
-	// NOTE: Defer can be removed
 	defer func() {
-		//ur.PrintTracerStack()
-		//ur.Conn().PrintTracerStack()
+		printTracerStack()
 	}()
 
+	// Setup
+	err := createUsers()
+
+	// Test
 	users, err := ur.GetAll(context.TODO())
 	if err != nil {
 		t.Errorf("GetAll users error: %v", err)
 	}
 
-	t.Logf("Users: %+v", users)
+	if len(users) != 2 {
+		t.Errorf("values differ from expected: %d (%d)", len(users), 2)
+	}
+
+	ok, diff := valuesMatch(&validUserData, users[0])
+	if !ok {
+		t.Errorf("values differ from expected: %v", diff)
+	}
+
+	ok, diff = valuesMatch(&validUserData2, users[1])
+	if !ok {
+		t.Errorf("values differ from expected: %v", diff)
+	}
 }
 
 // Helpers
-// Setup
 
+// Setup
 func setup() {
 	ur = getUserRepo()
 }
@@ -110,6 +145,24 @@ func shutdown() {
 
 func newTest(name string, function func(*testing.T)) test {
 	return test{name: name, function: function}
+}
+
+func createUsers() error {
+	user := &validUserData
+
+	err := ur.Create(context.TODO(), user)
+	if err != nil {
+		return err
+	}
+
+	user = &validUserData2
+
+	err = ur.Create(context.TODO(), user)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func valuesMatch(user, toCompare *model.User) (ok bool, diff []string) {
@@ -151,11 +204,11 @@ func valuesMatch(user, toCompare *model.User) (ok bool, diff []string) {
 		diff = append(diff, "Geolocation")
 	}
 
-	if user.StartsAt != toCompare.StartsAt {
+	if !equalsTime(user.StartsAt, toCompare.StartsAt) {
 		diff = append(diff, "StartsAt")
 	}
 
-	if user.EndsAt != toCompare.EndsAt {
+	if !equalsTime(user.EndsAt, toCompare.EndsAt) {
 		diff = append(diff, "EndsAt")
 	}
 
@@ -168,6 +221,19 @@ func valuesMatch(user, toCompare *model.User) (ok bool, diff []string) {
 	}
 
 	return len(diff) == 0, diff
+}
+
+func equalsTime(timeValue, toCompare time.Time) bool {
+	time01 := timeValue.Truncate(time.Millisecond)
+	time02 := toCompare.Truncate(time.Millisecond)
+	return time01.Equal(time02)
+}
+
+func printTracerStack() {
+	if printTrace {
+		ur.PrintTracerStack()
+		ur.Conn().PrintTracerStack()
+	}
 }
 
 func clear() error {
