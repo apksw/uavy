@@ -6,17 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"gitlab.com/adrianpk/uavy/auth/internal/db"
 	"gitlab.com/adrianpk/uavy/auth/internal/model"
 	"gitlab.com/adrianpk/uavy/auth/internal/repo/mongo"
 	"gitlab.com/adrianpk/uavy/auth/pkg/base"
-)
-
-type (
-	test struct {
-		name     string
-		function func(*testing.T)
-	}
 )
 
 const (
@@ -25,6 +19,11 @@ const (
 
 var (
 	validUserData = model.User{
+		Identification: base.Identification{
+			ID:       uuid.New(),
+			TenantID: "",
+			Slug:     "username-82d7eb7125e4",
+		},
 		Username:          "username",
 		PasswordDigest:    "jTZsh4!_XTSZZR4e",
 		Email:             "username@localhost.com",
@@ -42,6 +41,11 @@ var (
 	}
 
 	validUserData2 = model.User{
+		Identification: base.Identification{
+			ID:       uuid.New(),
+			TenantID: "",
+			Slug:     "username2-278b46cbfee4",
+		},
 		Username:          "username2",
 		PasswordDigest:    "ak/-6qt2=.KpM6G.",
 		Email:             "username2mail.com",
@@ -69,25 +73,13 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestBase(t *testing.T) {
-	setup()
-	suite := []test{
-		newTest("TestCreateUser", testCreateUser),
-		newTest("TestGetAllUsers", testGetAllUsers),
-	}
-
-	for _, test := range suite {
-		clear()
-		t.Run(test.name, test.function)
-	}
-
-	shutdown()
-}
-
-func testCreateUser(t *testing.T) {
+func TestCreateUser(t *testing.T) {
 	defer func() {
 		printTracerStack()
 	}()
+
+	// Setup
+	clear()
 
 	// Test
 	user := &validUserData
@@ -103,18 +95,23 @@ func testCreateUser(t *testing.T) {
 	}
 }
 
-func testGetAllUsers(t *testing.T) {
+func TestGetAllUsers(t *testing.T) {
 	defer func() {
 		printTracerStack()
 	}()
 
 	// Setup
+	clear()
+
 	err := createUsers()
+	if err != nil {
+		t.Errorf("setup error: %v", err)
+	}
 
 	// Test
 	users, err := ur.GetAll(context.TODO())
 	if err != nil {
-		t.Errorf("GetAll users error: %v", err)
+		t.Errorf("test error: %v", err)
 	}
 
 	if len(users) != 2 {
@@ -132,6 +129,31 @@ func testGetAllUsers(t *testing.T) {
 	}
 }
 
+func TestGetUser(t *testing.T) {
+	defer func() {
+		printTracerStack()
+	}()
+
+	// Setup
+	clear()
+
+	err := createUsers()
+	if err != nil {
+		t.Errorf("setup error: %v", err)
+	}
+
+	// Test
+	user, err := ur.Get(context.TODO(), validUserData.ID)
+	if err != nil {
+		t.Errorf("test error: %v", err)
+	}
+
+	ok, diff := valuesMatch(&validUserData, user)
+	if !ok {
+		t.Errorf("values differ from expected: %v", diff)
+	}
+}
+
 // Helpers
 
 // Setup
@@ -141,10 +163,6 @@ func setup() {
 
 func shutdown() {
 	clear()
-}
-
-func newTest(name string, function func(*testing.T)) test {
-	return test{name: name, function: function}
 }
 
 func createUsers() error {

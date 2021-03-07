@@ -51,7 +51,6 @@ func (ur *UserRepo) GetAll(ctx context.Context) (users []*model.User, err error)
 	}
 
 	opts := options.Find()
-	// opts.SetLimit(2)
 
 	cur, err := coll.Find(context.TODO(), bson.D{{}}, opts)
 	if err != nil {
@@ -77,8 +76,20 @@ func (ur *UserRepo) GetAll(ctx context.Context) (users []*model.User, err error)
 	return users, nil
 }
 
-func (ur *UserRepo) Get(ctx context.Context, uid uuid.UUID) (user *model.User, err error) {
-	return &model.User{}, nil
+func (ur *UserRepo) Get(ctx context.Context, id uuid.UUID) (user *model.User, err error) {
+	coll, err := ur.Collection()
+	if err != nil {
+		return user, err
+	}
+
+	filter := bson.M{"identification.id": id}
+
+	err = coll.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (ur *UserRepo) GetBySlug(ctx context.Context, slug string) (user *model.User, err error) {
