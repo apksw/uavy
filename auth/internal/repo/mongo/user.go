@@ -34,7 +34,7 @@ func (ur *UserRepo) Create(ctx context.Context, user *model.User) error {
 		return err
 	}
 
-	_, err = coll.InsertOne(context.TODO(), user)
+	_, err = coll.InsertOne(ctx, user)
 	if err != nil {
 		return err
 	}
@@ -52,12 +52,12 @@ func (ur *UserRepo) GetAll(ctx context.Context) (users []*model.User, err error)
 
 	opts := options.Find()
 
-	cur, err := coll.Find(context.TODO(), bson.D{{}}, opts)
+	cur, err := coll.Find(ctx, bson.D{{}}, opts)
 	if err != nil {
 		return users, err
 	}
 
-	for cur.Next(context.TODO()) {
+	for cur.Next(ctx) {
 		var u model.User
 		err := cur.Decode(&u)
 		if err != nil {
@@ -71,7 +71,7 @@ func (ur *UserRepo) GetAll(ctx context.Context) (users []*model.User, err error)
 		return users, err
 	}
 
-	cur.Close(context.TODO())
+	cur.Close(ctx)
 
 	return users, nil
 }
