@@ -1,5 +1,5 @@
 // package mongo provides a Mongo based implementation of UserRepo
-// interface
+/// interface
 package mongo
 
 import (
@@ -124,7 +124,24 @@ func (ur *UserRepo) GetByUsername(ctx context.Context, username string) (user *m
 	return user, nil
 }
 
-func (ur *UserRepo) Update(ctx context.Context, user *model.User) error {
+func (ur *UserRepo) Update(ctx context.Context, user *model.User) (err error) {
+	coll, err := ur.Collection()
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"identification.id": user.ID}
+	update := bson.M{
+		"$set": user,
+	}
+
+	res, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	ur.SendDebugf("user update result: %+v", res)
+
 	return nil
 }
 

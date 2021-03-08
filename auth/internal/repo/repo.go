@@ -15,7 +15,7 @@ type (
 		Get(ctx context.Context, uid uuid.UUID) (user *model.User, err error)
 		GetBySlug(ctx context.Context, slug string) (user *model.User, err error)
 		GetByUsername(ctx context.Context, username string) (*model.User, error)
-		Update(ctx context.Context, user *model.User) error
+		Update(ctx context.Context, user *model.User) (err error)
 		Delete(ctx context.Context, uid uuid.UUID) error
 		DeleteBySlug(ctx context.Context, slug string) error
 		DeleteByUsername(ctx context.Context, username string) error

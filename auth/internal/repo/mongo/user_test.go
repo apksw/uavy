@@ -81,7 +81,7 @@ func TestCreateUser(t *testing.T) {
 	// Setup
 	clear()
 
-	// Test
+	// Action
 	user := &validUserData
 
 	err := ur.Create(context.TODO(), user)
@@ -89,6 +89,7 @@ func TestCreateUser(t *testing.T) {
 		t.Errorf("CreateUser error: %v", err)
 	}
 
+	// Checkup
 	ok, diff := valuesMatch(&validUserData, user)
 	if !ok {
 		t.Errorf("values differ from expected: %v", diff)
@@ -108,12 +109,13 @@ func TestGetAllUsers(t *testing.T) {
 		t.Errorf("setup error: %v", err)
 	}
 
-	// Test
+	// Action
 	users, err := ur.GetAll(context.TODO())
 	if err != nil {
 		t.Errorf("test error: %v", err)
 	}
 
+	// Checkup
 	if len(users) != 2 {
 		t.Errorf("values differ from expected: %d (%d)", len(users), 2)
 	}
@@ -142,12 +144,13 @@ func TestGetUser(t *testing.T) {
 		t.Errorf("setup error: %v", err)
 	}
 
-	// Test
+	// Action
 	user, err := ur.Get(context.TODO(), validUserData.ID)
 	if err != nil {
 		t.Errorf("test error: %v", err)
 	}
 
+	// Checkup
 	ok, diff := valuesMatch(&validUserData, user)
 	if !ok {
 		t.Errorf("values differ from expected: %v", diff)
@@ -167,12 +170,13 @@ func TestGetUserBySlug(t *testing.T) {
 		t.Errorf("setup error: %v", err)
 	}
 
-	// Test
+	// Action
 	user, err := ur.GetBySlug(context.TODO(), validUserData.Slug)
 	if err != nil {
 		t.Errorf("test error: %v", err)
 	}
 
+	// Checkup
 	ok, diff := valuesMatch(&validUserData, user)
 	if !ok {
 		t.Errorf("values differ from expected: %v", diff)
@@ -192,13 +196,48 @@ func TestGetUserByUsername(t *testing.T) {
 		t.Errorf("setup error: %v", err)
 	}
 
-	// Test
+	// Action
 	user, err := ur.GetByUsername(context.TODO(), validUserData.Username)
 	if err != nil {
 		t.Errorf("test error: %v", err)
 	}
 
+	// Checkup
 	ok, diff := valuesMatch(&validUserData, user)
+	if !ok {
+		t.Errorf("values differ from expected: %v", diff)
+	}
+}
+
+func TestUpdateUser(t *testing.T) {
+	defer func() {
+		printTracerStack()
+	}()
+
+	// Setup
+	clear()
+
+	err := createUsers()
+	if err != nil {
+		t.Errorf("setup error: %v", err)
+	}
+
+	// Action
+	user := validUserData2
+	user.ID = validUserData.ID
+
+	err = ur.Update(context.TODO(), &user)
+	if err != nil {
+		t.Errorf("test error: %v", err)
+	}
+
+	// Checkup
+	user2, err := ur.Get(context.TODO(), validUserData.ID)
+	if err != nil {
+		t.Errorf("test error: %v", err)
+	}
+
+	ok, diff := valuesMatch(&validUserData2, user2)
 	if !ok {
 		t.Errorf("values differ from expected: %v", diff)
 	}
