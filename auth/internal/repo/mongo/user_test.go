@@ -154,6 +154,56 @@ func TestGetUser(t *testing.T) {
 	}
 }
 
+func TestGetUserBySlug(t *testing.T) {
+	defer func() {
+		printTracerStack()
+	}()
+
+	// Setup
+	clear()
+
+	err := createUsers()
+	if err != nil {
+		t.Errorf("setup error: %v", err)
+	}
+
+	// Test
+	user, err := ur.GetBySlug(context.TODO(), validUserData.Slug)
+	if err != nil {
+		t.Errorf("test error: %v", err)
+	}
+
+	ok, diff := valuesMatch(&validUserData, user)
+	if !ok {
+		t.Errorf("values differ from expected: %v", diff)
+	}
+}
+
+func TestGetUserByUsername(t *testing.T) {
+	defer func() {
+		printTracerStack()
+	}()
+
+	// Setup
+	clear()
+
+	err := createUsers()
+	if err != nil {
+		t.Errorf("setup error: %v", err)
+	}
+
+	// Test
+	user, err := ur.GetByUsername(context.TODO(), validUserData.Username)
+	if err != nil {
+		t.Errorf("test error: %v", err)
+	}
+
+	ok, diff := valuesMatch(&validUserData, user)
+	if !ok {
+		t.Errorf("values differ from expected: %v", diff)
+	}
+}
+
 // Helpers
 
 // Setup

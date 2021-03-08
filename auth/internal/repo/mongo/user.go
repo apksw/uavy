@@ -93,11 +93,35 @@ func (ur *UserRepo) Get(ctx context.Context, id uuid.UUID) (user *model.User, er
 }
 
 func (ur *UserRepo) GetBySlug(ctx context.Context, slug string) (user *model.User, err error) {
-	return &model.User{}, nil
+	coll, err := ur.Collection()
+	if err != nil {
+		return user, err
+	}
+
+	filter := bson.M{"identification.slug": slug}
+
+	err = coll.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
-func (ur *UserRepo) GetByUsername(ctx context.Context, username string) (*model.User, error) {
-	return &model.User{}, nil
+func (ur *UserRepo) GetByUsername(ctx context.Context, username string) (user *model.User, err error) {
+	coll, err := ur.Collection()
+	if err != nil {
+		return user, err
+	}
+
+	filter := bson.M{"username": username}
+
+	err = coll.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (ur *UserRepo) Update(ctx context.Context, user *model.User) error {
